@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 from gtts import gTTS
 import os
 
@@ -14,8 +14,8 @@ api_key = st.secrets.get("GEMINI_API_KEY", "")
 if not api_key:
     st.warning("Google Gemini API 키가 설정되지 않았습니다.")
 else:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # 최신 SDK 클라이언트 생성
+    client = genai.Client(api_key=api_key)
 
     # 대화 기록 초기화
     if "messages" not in st.session_state:
@@ -34,7 +34,10 @@ else:
 
         # Gemini 답변 생성
         try:
-            response = model.generate_content(prompt)
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+            )
             reply = response.text
 
             # 준코 답변 표시 및 저장
