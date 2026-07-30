@@ -1,6 +1,5 @@
 import streamlit as st
 from google import genai
-from gtts import gTTS
 import os
 
 # 페이지 기본 설정
@@ -37,6 +36,9 @@ else:
             response = client.models.generate_content(
                 model='gemini-2.0-flash',
                 contents=prompt,
+                config={
+                    'system_instruction': '너는 친근하고 다정한 한국어 AI 친구 준코야. 항상 반말조로 친절하고 자연스러운 한국어로 대답해줘.'
+                }
             )
             reply = response.text
 
@@ -44,5 +46,10 @@ else:
             with st.chat_message("assistant"):
                 st.markdown(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
+
         except Exception as e:
-            st.error(f"오류가 발생했습니다: {e}")
+            # 사용량 제한(429/Quota) 에러 시 친절한 한국어 안내
+            if "429" in str(e) or "quota" in str(e).lower():
+                st.warning("⏳ 말을 너무 빨리 걸었나 봐! 20~30초만 기다렸다가 다시 말해줘~")
+            else:
+                st.error(f"오류가 발생했습니다: {e}")
